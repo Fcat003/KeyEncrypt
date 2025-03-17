@@ -47,7 +47,7 @@ public class TrustedOperationManager {
      * @param userAuthRequired  是否需要生物认证
      * @throws Exception
      */
-    public void generateAESKey(String keyAlias, int keySize, String blockMode, String padding, boolean userAuthRequired) throws Exception {
+    private void generateAESKey(String keyAlias, int keySize, String blockMode, String padding, boolean userAuthRequired) throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEYSTORE);
         KeyGenParameterSpec spec = new KeyGenParameterSpec.Builder(
                 keyAlias,
@@ -64,7 +64,7 @@ public class TrustedOperationManager {
     /**
      * 从 Keystore 获取 AES 密钥
      */
-    public SecretKey getAESKey(String keyAlias) throws Exception {
+    private SecretKey getAESKey(String keyAlias) throws Exception {
         KeyStore.SecretKeyEntry entry = (KeyStore.SecretKeyEntry) keyStore.getEntry(keyAlias, null);
         return entry.getSecretKey();
     }
@@ -72,7 +72,7 @@ public class TrustedOperationManager {
     /**
      * 使用 AES/GCM/NoPadding 加密数据。系统自动生成 IV（12字节），返回组合数据：IV || 密文。
      */
-    public byte[] encryptDataAES(String keyAlias, String plainText) throws Exception {
+    private byte[] encryptDataAES(String keyAlias, String plainText) throws Exception {
         Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         SecretKey key = getAESKey(keyAlias);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -87,7 +87,7 @@ public class TrustedOperationManager {
     /**
      * 使用 AES/GCM/NoPadding 解密数据。输入数据前 12 字节为 IV。
      */
-    public String decryptDataAES(String keyAlias, byte[] combined) throws Exception {
+    private String decryptDataAES(String keyAlias, byte[] combined) throws Exception {
         int ivLength = 12;
         if (combined.length < ivLength) {
             throw new IllegalArgumentException("Invalid encrypted data");
@@ -110,7 +110,7 @@ public class TrustedOperationManager {
     /**
      * 生成 RSA 密钥对，并存储在 Keystore 中。
      */
-    public void generateRSAKeyPair(String keyAlias, int keySize, String transformation) throws Exception {
+    private void generateRSAKeyPair(String keyAlias, int keySize, String transformation) throws Exception {
         if (keyStore.containsAlias(keyAlias)) {
             return;
         }
@@ -133,7 +133,7 @@ public class TrustedOperationManager {
     /**
      * 使用 RSA 加密数据。只适用于小数据加密。
      */
-    public byte[] encryptDataRSA(String keyAlias, String transformation, byte[] data) throws Exception {
+    private byte[] encryptDataRSA(String keyAlias, String transformation, byte[] data) throws Exception {
         KeyStore.Entry entry = keyStore.getEntry(keyAlias, null);
         if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
             throw new IllegalArgumentException("RSA key not found");
@@ -146,7 +146,7 @@ public class TrustedOperationManager {
     /**
      * 使用 RSA 解密数据。
      */
-    public byte[] decryptDataRSA(String keyAlias, String transformation, byte[] cipherText) throws Exception {
+    private byte[] decryptDataRSA(String keyAlias, String transformation, byte[] cipherText) throws Exception {
         KeyStore.Entry entry = keyStore.getEntry(keyAlias, null);
         if (!(entry instanceof KeyStore.PrivateKeyEntry)) {
             throw new IllegalArgumentException("RSA key not found");
